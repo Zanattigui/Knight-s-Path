@@ -1,6 +1,6 @@
 import pygame
 
-from knight_path import Level
+from knight_path.Level import Level
 from knight_path.Menu import Menu
 from knight_path.const import MENU_OPTION, WIN_HEIGHT, WIN_WIDTH
 
