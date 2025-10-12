@@ -5,7 +5,7 @@ from knight_path.const import WIN_HEIGHT
 class Player(Entity):
     def __init__(self, name, position):
         super().__init__(name, position)
-        self.speed = 5
+        self.speed = 3
         self.jump_strength = 15
         self.gravity = 1
         self.vel_y = 0
