@@ -1,6 +1,4 @@
 from knight_path.const import WIN_WIDTH
-from knight_path.Player import Player
-
 
 class EntityFactory:
     @staticmethod
@@ -17,5 +15,7 @@ class EntityFactory:
             return Player('RogueIdle', position)
         if entity_name == 'Enemy1':
             from knight_path.Enemy import Enemy
-            # Exemplo: inimigo patrulha 150 pixels a partir da posição inicial
             return Enemy('GoblinRun', position, frames_count=10, patrol_range=(0, 100), speed=1)
+        if entity_name == 'EnemyBoss':
+            from knight_path.EnemyBoss import EnemyBoss
+            return EnemyBoss('BossWalk', position, frames_count=24, patrol_range=(0, 100), speed=1)
