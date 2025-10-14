@@ -9,6 +9,8 @@ class Enemy(Entity):
         self.attack_frames = [pygame.image.load(f'./assets/images/GoblinAttack{i}.png')for i in range(1, 7)]
         self.hurt_frames = [pygame.image.load(f'./assets/images/GoblinHurt{i}.png')for i in range(1, 13)]
         self.death_frames = [pygame.image.load(f'./assets/images/GoblinDead{i}.png') for i in range(1, 16)]
+        self.name_base = name_base
+        self.type = "enemy"
 
         self.is_attacking = False
         self.attack_frame_counter = 0

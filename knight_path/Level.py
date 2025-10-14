@@ -1,5 +1,6 @@
 import pygame
 import random
+from knight_path.EnemyBoss import EnemyBoss
 from knight_path.Entity import Entity
 from knight_path.EntityFactory import EntityFactory
 from knight_path.Platform import Platform
@@ -35,19 +36,31 @@ class Level:
         self.last_enemy_spawn_time = 0
 
         self.is_game_over = False
-        self.font = pygame.font.Font(None, 100)
+        self.font = pygame.font.Font("./assets/fonts/menuFont.ttf", 100)
         self.dead_text = self.font.render("DEAD", True, (200, 0, 0))
         self.dead_rect = self.dead_text.get_rect(center=(WIN_WIDTH // 2, 150))
         self.dead_alpha = 0
         self.dead_fade_speed = 5
 
         # ===== Botão de retorno =====
-        self.button_font = pygame.font.Font(None, 50)
+        self.button_font = pygame.font.Font("./assets/fonts/menuFont.ttf", 50)
         self.button_text = self.button_font.render("Return to Menu", True, (255, 255, 255))
         self.button_rect = self.button_text.get_rect(center=(WIN_WIDTH // 2, 300))
 
         self.button_bg_color = (80, 80, 80)
         self.button_hover_color = (120, 120, 120)
+
+        self.score = 0
+
+    def draw_score(self):
+        font = pygame.font.Font("./assets/fonts/menuFont.ttf", 40)
+        text = font.render(f"Score: {self.score}", True, (255, 255, 255))
+        self.window.blit(text, (20, 20))
+
+    def draw_health(self):
+        font = pygame.font.Font("./assets/fonts/menuFont.ttf", 40)
+        text = font.render(f"Vida: {self.player.health}", True, (200, 50, 50))
+        self.window.blit(text, (420, 20))
 
     def run(self):
         clock = pygame.time.Clock()
@@ -82,11 +95,16 @@ class Level:
                 dead_text_surface.set_alpha(self.dead_alpha)
                 self.window.blit(dead_text_surface, self.dead_rect)
 
-                # ======== Botão de retorno ao menu ========
-                font_button = pygame.font.Font(None, 50)
-                button_text = font_button.render("Menu", True, (255, 255, 255))
+                score_font = pygame.font.Font("./assets/fonts/menuFont.ttf", 35)
+                score_text = score_font.render(f"Score: {self.score}", True, (255, 255, 255))
+                score_rect = score_text.get_rect(center=(WIN_WIDTH // 2, 80))
+                self.window.blit(score_text, score_rect)
 
-                button_width, button_height = 100, 45
+                # ======== Botão de retorno ao menu ========
+                font_button = pygame.font.Font("./assets/fonts/menuFont.ttf", 50)
+                button_text = font_button.render("Retornar ao menu", True, (255, 255, 255))
+
+                button_width, button_height = 360, 50
                 button_x = self.window.get_width() // 2 - button_width // 2
                 button_y = self.window.get_height() // 2 + 60
 
@@ -123,8 +141,7 @@ class Level:
                 spawn_y_goblin = 130 if spawn_x in [25, 400] else 230
                 spawn_y_boss = 110 if spawn_x in [25, 400] else 210
 
-                # Decide aleatoriamente entre goblin e boss ou baseado em pontuação
-                if random.random() < 0.19:  # 10% chance de spawnar o boss
+                if random.random() < 0.19:
                     new_enemy = EntityFactory.get_entity('EnemyBoss', (spawn_x, spawn_y_boss))
                     print('Valkiria criada')
                 else:
@@ -137,7 +154,7 @@ class Level:
                 print(f"Novo inimigo criado em ({spawn_x}, {spawn_y})! Total: {len(self.enemy_list)}")
 
             # ===== Atualiza =====
-            for ent in self.entity_list[:]:  # copia da lista para remover sem erro
+            for ent in self.entity_list[:]:
                 if isinstance(ent, Player):
                     ent.move(keys, self.platforms)
                     ent.attack(keys, self.enemy_list)
@@ -146,21 +163,29 @@ class Level:
                 else:
                     ent.move()
 
-                # Remove inimigos mortos que já sumiram
-                if isinstance(ent, Enemy):
+                # Remove inimigos mortos que já sumiram e soma pontuação
+                if isinstance(ent, (Enemy, EnemyBoss)):
                     if ent.is_dead and ent.alpha <= 0:
+                        if isinstance(ent, EnemyBoss):
+                            self.score += 25
+                        else:
+                            self.score += 10
+
                         self.entity_list.remove(ent)
                         if ent in self.enemy_list:
                             self.enemy_list.remove(ent)
-                        continue  # não precisa desenhar mais
+
+                        continue
 
                 self.window.blit(source=ent.surf, dest=ent.rect)
 
-            #borda nos personagens para debug
+            #borda nos personagens para debugar
             # pygame.draw.rect(self.window, (255, 0, 0), self.player.rect, 2)
 
             # for enemy in self.enemy_list:
             #     pygame.draw.rect(self.window, (0, 0, 255), enemy.rect, 2)
+            self.draw_score()
+            self.draw_health()
 
             pygame.display.flip()
             clock.tick(60)

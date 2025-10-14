@@ -6,6 +6,8 @@ class EnemyBoss(Entity):
         super().__init__(name_base + '1', position)
 
         # Carrega frames do chefe
+        self.name_base = name_base
+        self.type = "boss"
         self.frames = [pygame.image.load(f'./assets/images/{name_base}{i}.png')for i in range(frames_count)]
         self.attack_frames = [pygame.image.load(f'./assets/images/BossAttack{i}.png')for i in range(1, 7)]
         self.hurt_frames = [pygame.image.load(f'./assets/images/BossHurt{i}.png')for i in range(1, 13)]
