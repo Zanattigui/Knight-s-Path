@@ -12,7 +12,7 @@ class EntityFactory:
             return list_bg
         if entity_name == 'Player':
             from knight_path.Player import Player
-            return Player('RogueIdle', position)
+            return Player('KnightIdle', position)
         if entity_name == 'Enemy1':
             from knight_path.Enemy import Enemy
             return Enemy('GoblinRun', position, frames_count=10, patrol_range=(0, 100), speed=1)

@@ -119,10 +119,7 @@ class Enemy(Entity):
         if not self.is_hurt:
             self.health -= amount
             self.is_hurt = True
-            print(f"Inimigo levou {amount} de dano! Vida restante: {self.health}")
             if self.health <= 0:
                 self.is_dead = True
                 self.current_frame = 0
                 self.death_frame_counter = 0
-                print("💀 Inimigo morreu!")
-

@@ -7,6 +7,7 @@ from knight_path.Platform import Platform
 from knight_path.Player import Player
 from knight_path.const import WIN_WIDTH
 from knight_path.Enemy import Enemy
+from knight_path.Heart import Heart 
 
 
 class Level:
@@ -16,6 +17,7 @@ class Level:
 
         self.entity_list: list[Entity] = []
         self.enemy_list: list[Entity] = []
+        self.heart_list: list[Heart] = []
 
         # Cria o fundo
         self.entity_list.extend(EntityFactory.get_entity('Level1Bg'))
@@ -34,6 +36,11 @@ class Level:
 
         self.enemy_spawn_delay = 5000
         self.last_enemy_spawn_time = 0
+
+        self.heart_spawn_delay = 15000
+        self.last_heart_spawn_time = 0
+        self.max_hearts_on_screen = 3
+        self.heal_sound = pygame.mixer.Sound("./assets/sounds/Heart.wav")
 
         self.is_game_over = False
         self.font = pygame.font.Font("./assets/fonts/menuFont.ttf", 100)
@@ -76,7 +83,7 @@ class Level:
             current_time = pygame.time.get_ticks()
 
             # ===== Checa se o player morreu =====
-            if self.player.health <= 0:
+            if self.player.death_animation_finished and not self.is_game_over:
                 self.is_game_over = True
 
             # ===== Lógica se o jogo acabou =====
@@ -136,14 +143,12 @@ class Level:
             if current_time - self.last_enemy_spawn_time > self.enemy_spawn_delay:
                 self.last_enemy_spawn_time = current_time
 
-                spawn_y = 0
                 spawn_x = random.choice([25, 400, 100, 200, 300])
                 spawn_y_goblin = 130 if spawn_x in [25, 400] else 230
                 spawn_y_boss = 110 if spawn_x in [25, 400] else 210
 
                 if random.random() < 0.19:
                     new_enemy = EntityFactory.get_entity('EnemyBoss', (spawn_x, spawn_y_boss))
-                    print('Valkiria criada')
                 else:
                     new_enemy = EntityFactory.get_entity('Enemy1', (spawn_x, spawn_y_goblin))
 
@@ -151,9 +156,17 @@ class Level:
                 self.entity_list.append(new_enemy)
                 self.enemy_list.append(new_enemy)
 
-                print(f"Novo inimigo criado em ({spawn_x}, {spawn_y})! Total: {len(self.enemy_list)}")
+                if (current_time - self.last_heart_spawn_time > self.heart_spawn_delay) and (len(self.heart_list) < self.max_hearts_on_screen):
+                    self.last_heart_spawn_time = current_time
 
-            # ===== Atualiza =====
+                    # Posições para o coração aparecer
+                    spawn_positions = [(100, 145), (475, 145), (280, 70)]
+                    spawn_pos = random.choice(spawn_positions)
+
+                    new_heart = Heart("Heart", spawn_pos)
+                    self.entity_list.append(new_heart)
+                    self.heart_list.append(new_heart)
+
             for ent in self.entity_list[:]:
                 if isinstance(ent, Player):
                     ent.move(keys, self.platforms)
@@ -184,6 +197,15 @@ class Level:
 
             # for enemy in self.enemy_list:
             #     pygame.draw.rect(self.window, (0, 0, 255), enemy.rect, 2)
+
+                    # ===== Lógica de Colisão com Corações =====
+            for heart in self.heart_list[:]:
+                if self.player.rect.colliderect(heart.rect):
+                    self.player.heal(1)
+                    self.heal_sound.play()
+                    self.heart_list.remove(heart)
+                    self.entity_list.remove(heart)
+
             self.draw_score()
             self.draw_health()
 
